@@ -1,7 +1,9 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 type Task = {
   id: string;
@@ -11,32 +13,50 @@ type Task = {
 
 export default function Dashboard() {
   const { token, logout } = useAuth();
+  const router = useRouter();
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState("");
 
   const loadTasks = async () => {
-    const data = await api("/tasks", "GET", undefined, token!);
-    setTasks(data);
+    if (!token) return;
+
+    try {
+      const data = await api("/tasks", "GET", undefined, token);
+      setTasks(data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
     loadTasks();
-  }, []);
+  }, [token]);
 
   const addTask = async () => {
-    if (!title) return;
-    await api("/tasks", "POST", { title }, token!);
+    if (!title || !token) return;
+
+    await api("/tasks", "POST", { title }, token);
     setTitle("");
     loadTasks();
   };
 
   const toggleTask = async (id: string) => {
-    await api(`/tasks/${id}/toggle`, "PATCH", null, token!);
+    if (!token) return;
+
+    await api(`/tasks/${id}/toggle`, "PATCH", null, token);
     loadTasks();
   };
 
   const deleteTask = async (id: string) => {
-    await api(`/tasks/${id}`, "DELETE", null, token!);
+    if (!token) return;
+
+    await api(`/tasks/${id}`, "DELETE", null, token);
     loadTasks();
   };
 
@@ -44,7 +64,13 @@ export default function Dashboard() {
     <div className="max-w-xl mx-auto p-6">
       <div className="flex justify-between mb-4">
         <h1 className="text-xl">My Tasks</h1>
-        <button onClick={logout} className="text-red-500">
+        <button
+          onClick={() => {
+            logout();
+            router.push("/login");
+          }}
+          className="text-red-500"
+        >
           Logout
         </button>
       </div>
@@ -56,7 +82,10 @@ export default function Dashboard() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-        <button onClick={addTask} className="ml-2 bg-black text-white px-4">
+        <button
+          onClick={addTask}
+          className="ml-2 bg-black text-white px-4"
+        >
           Add
         </button>
       </div>

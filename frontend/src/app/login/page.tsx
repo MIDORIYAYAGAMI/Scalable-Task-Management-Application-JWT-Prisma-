@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,14 +8,29 @@ import { useAuth } from "@/hooks/useAuth";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useAuth();
+  const [error, setError] = useState("");
+
+  const { login, token } = useAuth();
   const router = useRouter();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (token) {
+      router.push("/dashboard");
+    }
+  }, [token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await api("/auth/login", "POST", { email, password });
-    login(res.accessToken);
-    router.push("/dashboard");
+    setError("");
+
+    try {
+      const res = await api("/auth/login", "POST", { email, password });
+      login(res.accessToken);
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err.message || "Login failed");
+    }
   };
 
   return (
@@ -22,9 +38,16 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} className="w-80 p-6 border rounded">
         <h1 className="text-xl mb-4 text-center">Login</h1>
 
+        {error && (
+          <p className="mb-3 text-sm text-red-500 text-center">
+            {error}
+          </p>
+        )}
+
         <input
           className="w-full border p-2 mb-3"
           placeholder="Email"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
@@ -32,6 +55,7 @@ export default function LoginPage() {
           className="w-full border p-2 mb-4"
           type="password"
           placeholder="Password"
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
