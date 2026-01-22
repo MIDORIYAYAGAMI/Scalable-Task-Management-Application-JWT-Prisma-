@@ -13,12 +13,9 @@ export default function LoginPage() {
   const { login, token } = useAuth();
   const router = useRouter();
 
-  // Redirect if already logged in
   useEffect(() => {
-    if (token) {
-      router.push("/dashboard");
-    }
-  }, [token]);
+    if (token) router.push("/dashboard");
+  }, [token, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,11 +35,7 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} className="w-80 p-6 border rounded">
         <h1 className="text-xl mb-4 text-center">Login</h1>
 
-        {error && (
-          <p className="mb-3 text-sm text-red-500 text-center">
-            {error}
-          </p>
-        )}
+        {error && <p className="mb-3 text-sm text-red-500 text-center">{error}</p>}
 
         <input
           className="w-full border p-2 mb-3"
@@ -59,9 +52,7 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button className="w-full bg-black text-white py-2">
-          Login
-        </button>
+        <button className="w-full bg-black text-white py-2">Login</button>
       </form>
     </div>
   );

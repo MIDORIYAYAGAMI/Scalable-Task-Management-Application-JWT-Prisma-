@@ -36,7 +36,7 @@ export default function Dashboard() {
     }
 
     loadTasks();
-  }, [token]);
+  }, [token, router]);
 
   const addTask = async () => {
     if (!title || !token) return;

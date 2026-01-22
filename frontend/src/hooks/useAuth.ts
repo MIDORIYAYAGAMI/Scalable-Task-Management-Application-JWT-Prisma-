@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-export function useAuth() {
+export function useauth() {
   const [token, setToken] = useState<string | null>(
     typeof window !== "undefined"
       ? localStorage.getItem("token")
