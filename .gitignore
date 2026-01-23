@@ -22,3 +22,5 @@ rad.json
 TestResults.xml
 # Backend build output
 backend/dist
+.vercel
+.env*.local
